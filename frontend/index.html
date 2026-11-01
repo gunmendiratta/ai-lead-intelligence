@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lead Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">AI-ASSISTED LEAD INTELLIGENCE</p>
+      <h1>Turn a public page into a verified lead workflow.</h1>
+      <p class="lede">Extract public records first. Then use a prompt to filter, clean, and prepare those records for lead verification.</p>
+    </header>
+
+    <section class="panel form-panel">
+      <label for="url">Public website URL</label>
+      <input id="url" type="url" placeholder="https://example.com/directory" required>
+      <p class="hint">The extractor automatically collects all supported public fields: name, address, city, postal code, phone, email, website, category, and source evidence.</p>
+      <p class="hint">For a reliable Booking demo, use a browser-copied results URL with a city, dates, and guests, then enable browser mode. Booking may return a generic page for a bare search URL.</p>
+      <div class="controls">
+        <label class="check"><input id="browser" type="checkbox"> Render JavaScript page</label>
+        <label>Max records <input id="limit" type="number" min="1" max="500" value="100"></label>
+        <button id="planButton">Generate execution plan</button>
+      </div>
+    </section>
+
+    <section id="planPanel" class="panel hidden">
+      <div class="section-heading"><h2>Execution plan</h2><span id="planStatus" class="badge">Draft</span></div>
+      <pre id="planOutput"></pre>
+      <div id="warnings" class="warnings"></div>
+      <button id="runButton" disabled>Run approved plan</button>
+    </section>
+
+    <section id="resultsPanel" class="panel hidden">
+      <div class="section-heading"><h2>Extracted records</h2><span id="count" class="badge"></span></div>
+      <div class="table-wrap"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+      <div class="downloads"><button id="downloadJson">Download JSON</button><button id="downloadCsv">Download CSV</button></div>
+      <div class="post-actions">
+        <h3>Work with these records</h3>
+        <label for="recordPrompt">Record prompt</label>
+        <textarea id="recordPrompt" rows="2" placeholder="Remove hotels already managed by a company"></textarea>
+        <button id="commandButton">Apply prompt to extracted records</button>
+        <div id="commandResult" class="hidden"></div>
+      </div>
+      <div class="post-actions">
+        <h3>Lead generation</h3>
+        <p class="hint">After extraction, the app searches Google Places with business name plus city when configured; otherwise it uses no-key OpenStreetMap/Nominatim. It compares the returned address and builds a separate contacts list.</p>
+        <div class="field-grid"><label>Name field <input id="nameField" value="business_name"></label><label>Address field <input id="addressField" value="business_address"></label></div>
+        <button id="leadButton">Generate verified leads</button>
+        <div id="leadResult" class="hidden"></div>
+      </div>
+    </section>
+
+    <p id="message" class="message"></p>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
