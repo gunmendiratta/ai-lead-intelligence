@@ -153,6 +153,26 @@ def _first(card, selector):
     return None
 
 
+def _merge_records(record_groups, limit):
+    merged, positions = [], {}
+    for group in record_groups:
+        for record in group:
+            key = re.sub(r"\W+", "", str(record.get("business_name", "")).lower())
+            if not key:
+                continue
+            if key in positions:
+                existing = merged[positions[key]]
+                for field, value in record.items():
+                    if not existing.get(field) and value:
+                        existing[field] = value
+                continue
+            positions[key] = len(merged)
+            merged.append(dict(record))
+            if len(merged) >= limit:
+                return merged
+    return merged
+
+
 def execute_plan(plan_data):
     plan = ExecutionPlan(**{key: value for key, value in plan_data.items() if key in ExecutionPlan.__dataclass_fields__})
     if not safe_public_url(plan.source_url) or not _robots_allowed(plan.source_url):
@@ -188,13 +208,13 @@ def execute_plan(plan_data):
         records.append(record)
     warnings = list(plan.warnings or [])
     if not records:
-        fallback = _jsonld_records(soup, final_url)
-        if not fallback:
-            fallback, _ = extract_template_records(soup, final_url, plan.max_records)
-        fallback = fallback or _heuristic_records(soup, final_url, plan.max_records)
+        structured_records = _jsonld_records(soup, final_url)
+        template_records, _ = extract_template_records(soup, final_url, plan.max_records)
+        heuristic_records = _heuristic_records(soup, final_url, plan.max_records)
+        fallback = _merge_records((structured_records, template_records, heuristic_records), plan.max_records)
         for record in fallback:
             record["extraction_plan"] = plan.prompt
-        records = fallback[: plan.max_records]
+        records = fallback
         if records:
             warnings.append("The configured selectors found no cards; results came from a layered extraction fallback.")
         else:

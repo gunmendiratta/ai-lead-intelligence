@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from lead_intelligence.discovery import _heuristic_records, _jsonld_records, classify_source, google_maps_query
 from lead_intelligence.extraction import safe_public_url
 from lead_intelligence.templates import extract_template_records
-from lead_intelligence.planner import create_plan
+from lead_intelligence.planner import _merge_records, create_plan
 
 
 class DiscoveryTests(unittest.TestCase):
@@ -78,6 +78,20 @@ class DiscoveryTests(unittest.TestCase):
         )
         records, _ = extract_template_records(soup, "https://www.booking.com/city/in/new-delhi.html")
         self.assertEqual([record["business_name"] for record in records], ["The Imperial, New Delhi", "The Leela Palace New Delhi"])
+
+    def test_fallback_merges_structured_data_and_visible_listing_records(self):
+        merged = _merge_records(
+            (
+                [{"business_name": "First Hotel", "website": "", "business_address": ""}],
+                [
+                    {"business_name": "First Hotel", "website": "https://booking.com/hotel/first", "business_address": ""},
+                    {"business_name": "Second Hotel", "website": "https://booking.com/hotel/second", "business_address": ""},
+                ],
+            ),
+            100,
+        )
+        self.assertEqual([record["business_name"] for record in merged], ["First Hotel", "Second Hotel"])
+        self.assertEqual(merged[0]["website"], "https://booking.com/hotel/first")
 
 
 if __name__ == "__main__":
