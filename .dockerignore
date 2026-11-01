@@ -1,0 +1,16 @@
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.env
+.git/
+.gitignore
+*.sqlite
+*.log
+cache/
+logs/
+data/*.csv
+checkpoint_*.csv
+*.zip
+.DS_Store
